@@ -1,5 +1,5 @@
 /* Офлайн-кэш Jol Ustazy. Версия собирается автоматически. */
-const CACHE = 'pdd-85985d6905';
+const CACHE = 'pdd-cb06128183';
 const ASSETS = [
   './',
   './index.html',

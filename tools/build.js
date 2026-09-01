@@ -8,13 +8,14 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { splitSigns } = require('./split-signs');
 
 /* ---------- настройки проекта: имя меняется здесь и больше нигде ---------- */
 const CFG = {
   name:      'Jol Ustazy',
   shortName: 'Jol Ustazy',
-  descRu:    'Готовимся к теории ПДД Казахстана. 251 вопрос, у каждого объяснение, почему ответ именно такой. Бесплатно, без регистрации, работает без интернета.',
-  descKk:    'Қазақстан ЖҚЕ теориясына дайындық. 251 сұрақ, әрқайсысында жауаптың неге дәл солай екені түсіндірілген. Тегін, тіркелусіз, интернетсіз жұмыс істейді.',
+  descRu:    'Готовимся к теории ПДД Казахстана. 251 вопрос, у каждого объяснение, почему ответ именно такой. Бесплатно и без регистрации. Рядом полный текст ПДД, знаки и штрафы.',
+  descKk:    'Қазақстан ЖҚЕ теориясына дайындық. 251 сұрақ, әрқайсысында жауаптың неге дәл солай екені түсіндірілген. Тегін әрі тіркеусіз. Қасында ЖҚЕ толық мәтіні, белгілер және айыппұлдар.',
   lang:      'ru',
   themeDark: '#0A120E',
   themeLight:'#F2F0E9',
@@ -33,7 +34,7 @@ if (splitAt < 0) throw new Error('не найдено начало размет�
 const headPart = src.slice(0, splitAt).trim();
 const bodyPart = src.slice(splitAt).trim();
 
-const doc = `<!doctype html>
+let doc = `<!doctype html>
 <html lang="${CFG.lang}">
 <head>
 <meta charset="utf-8">
@@ -70,6 +71,11 @@ if ('serviceWorker' in navigator) {
 `;
 
 fs.mkdirSync(OUT, { recursive: true });
+
+/* картинки знаков — отдельными файлами, иначе страница весит лишние 1,7 МБ */
+const split = splitSigns(doc, OUT);
+doc = split.doc;
+
 fs.writeFileSync(path.join(OUT, 'index.html'), doc, 'utf8');
 
 /* версия кэша завязана на содержимое: обновили сайт — обновился кэш */
@@ -167,4 +173,5 @@ console.log('Собрано в docs/');
 console.log('  index.html            ' + kb('index.html') + ' КБ');
 console.log('  manifest.webmanifest  ' + kb('manifest.webmanifest') + ' КБ');
 console.log('  sw.js                 ' + kb('sw.js') + ' КБ  (кэш pdd-' + ver + ')');
+console.log('  signs/                ' + split.written + ' файлов знаков, страница легче на ' + split.savedKb + ' КБ');
 console.log('  404.html, robots.txt, .nojekyll, иконки');
