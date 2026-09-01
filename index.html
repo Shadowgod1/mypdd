@@ -336,6 +336,74 @@ footer a{color:var(--ink-2)}
 .pill-t{font-family:var(--mono);font-weight:500;letter-spacing:.02em}
 .ring-pct{font-family:var(--serif);font-weight:600;letter-spacing:-.02em}
 
+
+/* ============================================================
+   ШИРОКИЕ ЭКРАНЫ: раскладка для компьютера
+   ============================================================ */
+.home-grid{display:contents}
+.home-a,.home-b{display:contents}
+.kbdhint{display:none}
+
+@media (min-width:900px){
+  .wrap{max-width:1120px}
+  .bar-in{max-width:1120px}
+
+  .hero{padding:88px 0 12px}
+  .hero h1{font-size:clamp(52px,4.6vw,66px)}
+  .hero p{font-size:19px;max-width:56ch}
+
+  /* действия слева, справочник справа */
+  .home-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:0 64px;align-items:start;margin-top:48px}
+  .home-a,.home-b{display:block}
+  .modes{margin-top:0;gap:14px}
+  .mode{padding:24px}
+  .stats{margin-top:0}
+  .sec-h{margin-top:36px}
+  .home-b .sec-h:first-child{margin-top:0}
+  .note{max-width:74ch}
+
+  /* карточка вопроса: схема слева, текст и ответы справа */
+  .card{margin-top:36px}
+  .card.has-fig{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr)}
+  .card.has-fig>.figure{
+    grid-column:1;grid-row:1/span 20;
+    border-bottom:0;border-right:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;padding:32px 26px;
+  }
+  .card.has-fig>.figure svg{max-width:360px}
+  .card.has-fig>*:not(.figure){grid-column:2;align-self:start}
+  .card.has-fig>.q-topic{padding-top:30px}
+  .q-text{font-size:24px}
+  .opt{font-size:16.5px}
+
+  /* кнопки не растягиваются во всю ширину */
+  .actions{justify-content:flex-end;padding-top:24px}
+  .btn{flex:0 0 auto;min-width:190px}
+  .btn.ghost{min-width:130px}
+
+  /* подсказка по клавишам — только там, где есть клавиатура */
+  .kbdhint{
+    display:block;text-align:right;margin:-28px 0 48px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+
+  /* длинные тексты держим в читаемой мере, а не во всю ширину */
+  .prose{max-width:78ch;margin-left:auto;margin-right:auto;padding:44px 48px 48px}
+  .verdict-card{max-width:660px;margin-left:auto;margin-right:auto}
+  .rev{max-width:860px;margin-left:auto;margin-right:auto}
+  .sec-h{max-width:860px;margin-left:auto;margin-right:auto}
+  .home-b .sec-h{max-width:none}
+}
+
+@media (min-width:1180px){
+  .hero{padding:104px 0 12px}
+  .home-grid{gap:0 80px}
+}
+
+/* сенсорным устройствам подсказка про клавиши не нужна */
+@media (hover:none){ .kbdhint{display:none} }
+
 /* ============================================================
    МОБИЛЬНЫЕ УСТРОЙСТВА: безопасные зоны, касания, отклики
    ============================================================ */
@@ -2836,6 +2904,7 @@ ru:{
   noteMore:'Подробнее',
   footer:'Сделано бесплатно. Рекламы и сбора данных здесь нет.',
 
+  kbdHint:'Клавиши 1–4 — выбрать ответ, Enter — дальше',
   quit:'Выйти',
   next:'Дальше',
   finishBtn:'Завершить',
@@ -2920,6 +2989,7 @@ kk:{
   noteMore:'Толығырақ',
   footer:'Тегін жасалған. Жарнама да, дерек жинау да жоқ.',
 
+  kbdHint:'1–4 пернелері — жауапты таңдау, Enter — әрі қарай',
   quit:'Шығу',
   next:'Әрі қарай',
   finishBtn:'Аяқтау',
@@ -3032,11 +3102,15 @@ function screenHome(){
      '<p>'+t('heroText',total,plural(total,['вопрос','вопроса','вопросов']))+'</p>'+
    '</section>'+
 
-   '<div class="modes">'+
+   '<div class="home-grid">'+
+     '<div class="home-a">'+
+     '<div class="modes">'+
      modeCard('primary',icExam,t('mExam'),t('mExamD',EXAM_N,EXAM_MIN,EXAM_PASS,EXAM_ERR),'data-go="exam"')+
      modeCard('',icMar,t('mMar'),t('mMarD',total,plural(total,['вопрос','вопроса','вопросов'])),'data-go="marathon"')+
      modeCard('',icErr,t('mErr'), mist ? t('mErrD',mistLabel) : t('mErrEmpty'),'data-go="mistakes"'+(mist?'':' disabled'))+
    '</div>'+
+     '</div>'+
+     '<div class="home-b">'+
 
    '<div class="stats">'+
      '<div class="stat"><b>'+seen+'/'+total+'</b><span>'+t('stDone')+'</span></div>'+
@@ -3054,6 +3128,8 @@ function screenHome(){
         '<span class="topic-c">'+good+'/'+qs.length+'</span>'+
         '<span class="tprog"><i style="width:'+pct+'%"></i></span></button>';
    }).join('')+'</div>'+
+     '</div>'+
+   '</div>'+
 
    '<div class="note"><b>'+t('noteB')+'</b> '+t('noteText')+' <button id="about-link" class="linkish">'+t('noteMore')+'</button></div>'+
 
@@ -3089,7 +3165,7 @@ function screenQuiz(){
   const exp = shown ? '<div class="exp '+(ok?'ok':'no')+'"><span class="verdict">'+(ok?t('right'):t('wrong'))+'</span>'+esc(L.e)+'</div>' : '';
 
   app.innerHTML =
-    '<div class="card">'+
+    '<div class="card'+(q.img?' has-fig':'')+'">'+
       (q.img ? '<div class="figure">'+q.img()+'</div>' : '')+
       '<div class="q-topic">'+tn(q.t)+'</div>'+
       '<p class="q-text">'+esc(L.q)+'</p>'+
@@ -3100,7 +3176,8 @@ function screenQuiz(){
       '<button class="btn ghost" id="quit">'+t('quit')+'</button>'+
       '<button class="btn'+(shown?' acc':'')+'" id="nextb"'+(it.picked===null?' disabled':'')+'>'+
         (S.i===S.queue.length-1 ? t('finishBtn') : t('next'))+'</button>'+
-    '</div>';
+    '</div>'+
+    '<div class="kbdhint">'+t('kbdHint')+'</div>';
 
   app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>pick(+b.dataset.pick));
   document.getElementById('nextb').onclick = next;
