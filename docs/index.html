@@ -357,6 +357,35 @@ footer a{color:var(--ink-2)}
 .ring-pct{font-family:var(--serif);font-weight:600;letter-spacing:-.02em}
 
 
+
+/* ---------- готовность, история, шпаргалка ---------- */
+.ready{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:12px}
+.ready-head{display:flex;gap:18px;align-items:center}
+.ring-mini{width:80px;height:80px;flex:0 0 auto;display:block}
+.ready-t{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em}
+.ready-d{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-top:4px}
+.ready .stats{margin-top:18px;border-radius:var(--r-sm)}
+
+.exams{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.exrow{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;background:var(--surface);padding:13px 16px}
+.exd{color:var(--ink-2);font-size:14.5px}
+.exn{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.exv{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.exv.ok{color:var(--ok)}
+.exv.no{color:var(--bad)}
+
+.cheat{display:flex;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin-bottom:8px}
+.cheat-signs{display:flex;gap:10px;flex:0 0 auto}
+.cheat-signs svg{width:52px;height:auto;display:block}
+.cheat-t{margin:0;color:var(--ink-2);font-size:14.5px;line-height:1.5}
+@media (max-width:400px){
+  .cheat{gap:14px;padding:14px}
+  .cheat-signs svg{width:44px}
+  .cheat-t{font-size:14px}
+  .ready-head{gap:14px}
+  .ring-mini{width:68px;height:68px}
+}
+
 /* ============================================================
    ШИРОКИЕ ЭКРАНЫ: раскладка для компьютера
    ============================================================ */
@@ -530,12 +559,12 @@ function signPost(cx,cy,code,w){
    ============================================================ */
 const CAR_C = {you:'#4FB884', blue:'#4FB884', red:'#C86A52', white:'#E5EAE1', gray:'#7E8F84', tram:'#C79A4B'};
 const APPR = {
-  S:{rot:0,   idle:[144,152], stop:[144,136]},
-  N:{rot:180, idle:[176,48],  stop:[176,64]},
+  S:{rot:0,   idle:[176,152], stop:[176,136]},
+  N:{rot:180, idle:[144,48],  stop:[144,64]},
   W:{rot:90,  idle:[52,116],  stop:[124,116]},
   E:{rot:270, idle:[268,84],  stop:[196,84]}
 };
-const EXITP = {N:[144,-6], S:[176,206], W:[-6,84], E:[326,116]};
+const EXITP = {N:[176,-6], S:[144,206], W:[-6,84], E:[326,116]};
 const TURNS = {
   S:{straight:'N',left:'W',right:'E'},
   N:{straight:'S',left:'E',right:'W'},
@@ -685,11 +714,11 @@ function scene(sp){
   (sp.zebra||[]).forEach(s=>{ o += zebra(s); });
   (sp.arrows||[]).forEach(a=>{ o += arrowPath(a.at, a.turn, a.from); });
   (sp.signs||[]).forEach(s=>{
-    const pos = {S:[110,152],N:[210,48],W:[60,146],E:[260,54],SW:[110,152],SE:[210,152],NW:[110,48],NE:[210,48]}[s.at]||[110,152];
+    const pos = {S:[210,152],N:[110,48],W:[60,146],E:[260,54],SW:[110,152],SE:[210,152],NW:[110,48],NE:[210,48]}[s.at]||[210,152];
     o += signPost(pos[0],pos[1],s.code,s.size||34);
   });
   (sp.lights||[]).forEach(l=>{
-    const pos = {S:[206,128],N:[114,72],W:[62,58],E:[258,142],C:[160,100]}[l.at]||[206,128];
+    const pos = {S:[206,128],N:[114,72],W:[62,142],E:[258,58],C:[160,100]}[l.at]||[206,128];
     o += trafficLight(pos[0],pos[1],l.state);
   });
   if(sp.warden) o += warden(160,100,sp.warden);
@@ -2915,6 +2944,19 @@ ru:{
   mErrD:'Здесь {0}, где вы спотыкались',
   mErrEmpty:'Пока пусто. Сначала пройдите тест',
 
+  readyT:'Готовность к экзамену',
+  readySub:'Верно отвечено {0} из {1}',
+  ready0:'Ещё не начинали. Возьмите тему целиком или сразу попробуйте экзамен',
+  ready1:'В СпецЦОН пока рано. Начните с тем, где пройдено меньше всего',
+  ready2:'Уже неплохо. Добейте слабые темы и прогоните экзамен',
+  ready3:'Похоже, вы готовы. Прогоните экзамен ещё пару раз для уверенности',
+  secExams:'Последние экзамены',
+  examOk:'сдан',
+  examNo:'не сдан',
+  secCheat:'Легко перепутать',
+  cheat1:'Слева достаточно уступить и можно ехать не останавливаясь. Справа остановка обязательна, даже если дорога пуста.',
+  cheat2:'Слева въезд закрыт только с этой стороны, обратно выехать можно. Справа движение запрещено в обе стороны.',
+  cheat3:'Слева стоять нельзя совсем. Справа можно остановиться и высадить пассажира или разгрузиться.',
   stDone:'Пройдено',
   stPassed:'Сдано',
   stErrors:'Ошибок',
@@ -3000,6 +3042,19 @@ kk:{
   mErrD:'Сіз сүрінген {0} осында',
   mErrEmpty:'Әзірге бос. Алдымен тест тапсырыңыз',
 
+  readyT:'Емтиханға дайындық',
+  readySub:'{1} сұрақтың {0} дұрыс',
+  ready0:'Әзірге бастамағансыз. Бір тақырыпты толық алыңыз немесе бірден емтихан көріңіз',
+  ready1:'Арнайы ХҚКО-ға әлі ерте. Ең аз өтілген тақырыптардан бастаңыз',
+  ready2:'Жаман емес. Әлсіз тақырыптарды пысықтап, емтихан тапсырып көріңіз',
+  ready3:'Дайын сияқтысыз. Сенімді болу үшін емтиханды тағы бірер рет өтіңіз',
+  secExams:'Соңғы емтихандар',
+  examOk:'тапсырылды',
+  examNo:'тапсырылмады',
+  secCheat:'Шатастыру оңай',
+  cheat1:'Сол жақта жол беру жеткілікті, тоқтамай жүре беруге болады. Оң жақта тоқтау міндетті, тіпті жол бос болса да.',
+  cheat2:'Сол жақта кіру тек осы жақтан жабық, кері шығуға болады. Оң жақта қозғалыс екі бағытта да тыйым салынған.',
+  cheat3:'Сол жақта мүлде тұруға болмайды. Оң жақта аялдап, жолаушы түсіруге немесе жүк түсіруге болады.',
   stDone:'Өтілді',
   stPassed:'Тапсырылды',
   stErrors:'Қателер',
@@ -3098,6 +3153,14 @@ function applyLang(l){
 /* ============================================================
    ЭКРАНЫ
    ============================================================ */
+function ringMini(pct){
+  const r = 34, c = 2*Math.PI*r, off = c*(1-pct/100);
+  return '<svg class="ring-mini" viewBox="0 0 80 80" aria-hidden="true">'+
+    '<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="var(--line-2)" stroke-width="7"/>'+
+    '<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 40 40)"/>'+
+    '<text x="40" y="41" class="ring-pct" font-size="19" fill="var(--ink)" text-anchor="middle" dominant-baseline="central">'+pct+'%</text></svg>';
+}
+
 function screenHome(){
   barSlot.innerHTML = '';
   const total = Q.length;
@@ -3105,6 +3168,11 @@ function screenHome(){
   const exams = DB.exams.length;
   const passed = DB.exams.filter(e=>e.p).length;
   const mist = DB.mistakes.length;
+
+  /* готовность: доля вопросов, отвеченных верно и не висящих в ошибках */
+  const good = Q.filter(q=>DB.done[q.id] && DB.done[q.id].ok>0 && !DB.mistakes.includes(q.id)).length;
+  const ready = total ? Math.round(good/total*100) : 0;
+  const advice = ready===0 ? t('ready0') : (ready<40 ? t('ready1') : (ready<80 ? t('ready2') : t('ready3')));
 
   const modeCard = (cls,ic,ttl,d,attr)=>'<button class="mode '+cls+'" '+attr+'>'+
     '<span class="m-ic">'+ic+'</span><span><span class="m-t">'+ttl+'</span><span class="m-d">'+d+'</span></span>'+
@@ -3116,6 +3184,26 @@ function screenHome(){
 
   const mistLabel = LANG==='kk' ? (mist+' сұрақ') : (mist+' '+plural(mist,['вопрос','вопроса','вопросов']));
 
+  /* последние попытки экзамена */
+  const dloc = LANG==='kk' ? 'kk-KZ' : 'ru-RU';
+  const exRows = DB.exams.slice(0,5).map(e=>{
+    let dd = '';
+    try{ dd = new Date(e.d).toLocaleDateString(dloc,{day:'numeric',month:'long'}); }catch(err){ dd = ''; }
+    return '<div class="exrow"><span class="exd">'+dd+'</span>'+
+           '<span class="exn">'+e.r+'/'+e.n+'</span>'+
+           '<span class="exv '+(e.p?'ok':'no')+'">'+(e.p?t('examOk'):t('examNo'))+'</span></div>';
+  }).join('');
+  const examsBlock = exams ? '<div class="sec-h">'+t('secExams')+'</div><div class="exams">'+exRows+'</div>' : '';
+
+  /* шпаргалка: пары знаков, которые чаще всего путают */
+  const cheatRow = (a,b,txt)=>'<div class="cheat">'+
+    '<div class="cheat-signs">'+sign(a)+sign(b)+'</div>'+
+    '<p class="cheat-t">'+txt+'</p></div>';
+  const cheatBlock = '<div class="sec-h">'+t('secCheat')+'</div>'+
+    cheatRow('giveway','stop',t('cheat1'))+
+    cheatRow('noentry','novehicle',t('cheat2'))+
+    cheatRow('noStop','noPark',t('cheat3'));
+
   app.innerHTML =
    '<section class="hero">'+
      '<div class="eyebrow">'+t('heroEyebrow')+'</div>'+
@@ -3126,29 +3214,38 @@ function screenHome(){
    '<div class="home-grid">'+
      '<div class="home-a">'+
      '<div class="modes">'+
-     modeCard('primary',icExam,t('mExam'),t('mExamD',EXAM_N,EXAM_MIN,EXAM_PASS,EXAM_ERR),'data-go="exam"')+
-     modeCard('',icMar,t('mMar'),t('mMarD',total,plural(total,['вопрос','вопроса','вопросов'])),'data-go="marathon"')+
-     modeCard('',icErr,t('mErr'), mist ? t('mErrD',mistLabel) : t('mErrEmpty'),'data-go="mistakes"'+(mist?'':' disabled'))+
-   '</div>'+
+       modeCard('primary',icExam,t('mExam'),t('mExamD',EXAM_N,EXAM_MIN,EXAM_PASS,EXAM_ERR),'data-go="exam"')+
+       modeCard('',icMar,t('mMar'),t('mMarD',total,plural(total,['вопрос','вопроса','вопросов'])),'data-go="marathon"')+
+       modeCard('',icErr,t('mErr'), mist ? t('mErrD',mistLabel) : t('mErrEmpty'),'data-go="mistakes"'+(mist?'':' disabled'))+
      '</div>'+
+
+     '<div class="ready">'+
+       '<div class="ready-head">'+ringMini(ready)+
+         '<div><div class="ready-t">'+t('readyT')+'</div>'+
+         '<div class="ready-d">'+t('readySub',good,total)+'. '+advice+'</div></div>'+
+       '</div>'+
+       '<div class="stats">'+
+         '<div class="stat"><b>'+seen+'/'+total+'</b><span>'+t('stDone')+'</span></div>'+
+         '<div class="stat"><b>'+passed+'/'+exams+'</b><span>'+t('stPassed')+'</span></div>'+
+         '<div class="stat"><b>'+mist+'</b><span>'+t('stErrors')+'</span></div>'+
+       '</div>'+
+     '</div>'+
+
+     examsBlock +
+     cheatBlock +
+     '</div>'+
+
      '<div class="home-b">'+
-
-   '<div class="stats">'+
-     '<div class="stat"><b>'+seen+'/'+total+'</b><span>'+t('stDone')+'</span></div>'+
-     '<div class="stat"><b>'+passed+'/'+exams+'</b><span>'+t('stPassed')+'</span></div>'+
-     '<div class="stat"><b>'+mist+'</b><span>'+t('stErrors')+'</span></div>'+
-   '</div>'+
-
-   '<div class="sec-h">'+t('secTopics')+'</div>'+
-   '<div class="topics">'+ TOPICS.map(x=>{
-      const qs = Q.filter(q=>q.t===x.id);
-      const good = qs.filter(q=>DB.done[q.id] && DB.done[q.id].ok>0 && !DB.mistakes.includes(q.id)).length;
-      const pct = qs.length ? Math.round(good/qs.length*100) : 0;
-      return '<button class="topic" data-topic="'+x.id+'">'+
-        '<span class="topic-n">'+tn(x.id)+'</span>'+
-        '<span class="topic-c">'+good+'/'+qs.length+'</span>'+
-        '<span class="tprog"><i style="width:'+pct+'%"></i></span></button>';
-   }).join('')+'</div>'+
+     '<div class="sec-h">'+t('secTopics')+'</div>'+
+     '<div class="topics">'+ TOPICS.map(x=>{
+        const qs = Q.filter(q=>q.t===x.id);
+        const g = qs.filter(q=>DB.done[q.id] && DB.done[q.id].ok>0 && !DB.mistakes.includes(q.id)).length;
+        const pct = qs.length ? Math.round(g/qs.length*100) : 0;
+        return '<button class="topic" data-topic="'+x.id+'">'+
+          '<span class="topic-n">'+tn(x.id)+'</span>'+
+          '<span class="topic-c">'+g+'/'+qs.length+'</span>'+
+          '<span class="tprog"><i style="width:'+pct+'%"></i></span></button>';
+     }).join('')+'</div>'+
      '</div>'+
    '</div>'+
 
