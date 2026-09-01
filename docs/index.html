@@ -428,8 +428,6 @@ footer a{color:var(--ink-2)}
   color:var(--ink-2);font-size:14.5px;line-height:1.55;
 }
 .help-note{margin:14px 0 0;color:var(--ink-3);font-size:12.5px;line-height:1.5}
-.opt.cut{opacity:.32}
-.opt.cut span:last-child{text-decoration:line-through}
 @media (max-width:520px){ .helper{margin:0 14px 14px} }
 
 /* меню классификации вместо ряда переключателей */
@@ -3699,16 +3697,14 @@ ru:{
   whyWrong:'Почему это неверно',
   whyRight:'Почему это верно',
   yourPick:'Вы выбрали:',
-  helpIntro:'Подскажу, не называя ответ. Если совсем тупик — открою его, но вопрос тогда пойдёт в ошибки.',
-  helpNarrow:'Убрать два неверных',
+  helpIntro:'Подскажу, не называя ответ.',
+  helpHint:'Подсказать',
   helpChapter:'Где это в правилах',
-  helpReveal:'Показать ответ',
-  helpNarrowDone:'Осталось два варианта. Остальные точно неверны.',
+  hintNone:'Тема: «{0}». Правило здесь короткое — сравните варианты между собой и отбросьте те, которые добавляют условия, которых в правиле нет.',
   helpChapterFound:'Это тема «{0}». В правилах смотрите {1}.',
   helpChapterNone:'Это тема «{0}». В правилах отдельной главы нет — смотрите раздел «ПМП».',
-  helpRevealed:'Верный ответ отмечен. Вопрос засчитан как ошибка и попадёт в работу над ошибками.',
   helpAsk:'Хочу спросить своими словами',
-  helpAskNote:'Свободные вопросы к ИИ пока не подключены: для них нужен сервер с ключом, а сайт работает без сервера и без сбора данных. Пока пользуйтесь тремя подсказками выше и разбором после ответа.',
+  helpAskNote:'Свободные вопросы к ИИ пока не подключены: для них нужен сервер с ключом, а сайт работает без сервера и без сбора данных. Пока пользуйтесь двумя подсказками выше и разбором после ответа.',
   filterLabel:'Раздел справочника',
   zoomOpen:'Открыть крупнее',
   zoomClose:'Закрыть',
@@ -3889,16 +3885,14 @@ kk:{
   whyWrong:'Неге бұл дұрыс емес',
   whyRight:'Неге бұл дұрыс',
   yourPick:'Сіз таңдадыңыз:',
-  helpIntro:'Жауапты айтпай бағыт беремін. Мүлде тығырыққа тірелсеңіз — ашамын, бірақ сұрақ қате болып саналады.',
-  helpNarrow:'Екі қате нұсқаны алып тастау',
+  helpIntro:'Жауапты айтпай бағыт беремін.',
+  helpHint:'Бағыт беру',
   helpChapter:'Бұл ережелердің қай жерінде',
-  helpReveal:'Жауапты көрсету',
-  helpNarrowDone:'Екі нұсқа қалды. Қалғандары нақты қате.',
+  hintNone:'Тақырып: «{0}». Ереже мұнда қысқа — нұсқаларды өзара салыстырып, ережеде жоқ шарттарды қосатындарын алып тастаңыз.',
   helpChapterFound:'Бұл «{0}» тақырыбы. Ережелерден {1} қараңыз.',
   helpChapterNone:'Бұл «{0}» тақырыбы. Ережелерде жеке тарау жоқ — «ПМП» бөлімін қараңыз.',
-  helpRevealed:'Дұрыс жауап белгіленді. Сұрақ қате деп есептеліп, қателермен жұмысқа түседі.',
   helpAsk:'Өз сөзіммен сұрағым келеді',
-  helpAskNote:'ИИ-ге еркін сұрақ қою әзірге қосылмаған: ол үшін кілті бар сервер керек, ал сайт серверсіз және дерек жинамай жұмыс істейді. Әзірге жоғарыдағы үш көмекті және жауаптан кейінгі талдауды пайдаланыңыз.',
+  helpAskNote:'ИИ-ге еркін сұрақ қою әзірге қосылмаған: ол үшін кілті бар сервер керек, ал сайт серверсіз және дерек жинамай жұмыс істейді. Әзірге жоғарыдағы екі көмекті және жауаптан кейінгі талдауды пайдаланыңыз.',
   filterLabel:'Анықтамалық бөлімі',
   zoomOpen:'Үлкейтіп ашу',
   zoomClose:'Жабу',
@@ -4974,6 +4968,30 @@ function helpTokens(s){
     .map(w => w.slice(0, 6)))];
 }
 
+/* Подсказка, не выдающая ответ: берём из разбора первую фразу, в которой
+   нет отличительных слов и чисел верного варианта. Если такой фразы нет,
+   даём общий наводящий текст — врать и подсказывать неверно нельзя. */
+function hintWords(s){
+  return String(s).toLowerCase().replace(/[^а-яёa-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);
+}
+function makeHint(q, L){
+  const corr = L.o[q.a] || '';
+  const qs = new Set(hintWords(L.q).filter(w=>w.length>4).map(w=>w.slice(0,6)));
+  const qn = new Set(hintWords(L.q).filter(w=>/^\d+$/.test(w)));
+  const key = [...new Set(hintWords(corr).filter(w=>w.length>4).map(w=>w.slice(0,6)))].filter(w=>!qs.has(w));
+  const kn  = [...new Set(hintWords(corr).filter(w=>/^\d+$/.test(w)))].filter(w=>!qn.has(w));
+
+  const sent = String(L.e || '').split(/(?<=[.!?])\s+/).filter(x => x.trim().length > 45);
+  for(const st of sent){
+    const sl = st.toLowerCase();
+    if(kn.some(n => new RegExp('\\b'+n+'\\b').test(sl))) continue;
+    let hit = 0;
+    for(const w of key) if(sl.indexOf(w) > -1) hit++;
+    if(hit === 0) return st.trim();
+  }
+  return null;
+}
+
 function findChapter(q){
   if(typeof RULES_DATA === 'undefined' || !RULES_DATA.length) return null;
   const ids = TOPIC_CH[q.t] || [];
@@ -5184,9 +5202,8 @@ function helperBlock(it){
 
   return '<div class="helper flat">'+
     '<div class="help-row">'+
-      btn('narrow', t('helpNarrow'), !!used.narrow)+
+      btn('hint', t('helpHint'), !!used.hint)+
       btn('chapter', t('helpChapter'), !!used.chapter)+
-      btn('reveal', t('helpReveal'), !!used.reveal)+
     '</div>'+
     out +
     '<p class="help-note">'+t('helpAskNote')+'</p>'+
@@ -5202,23 +5219,15 @@ function hookHelper(it){
       if(used[kind]) return;
       used[kind] = true;
 
-      if(kind === 'narrow'){
-        const wrong = [];
-        for(let i = 0; i < it.order.length; i++) if(i !== it.correct) wrong.push(i);
-        it.cut = shuffle(wrong).slice(0, Math.max(0, wrong.length - 1));
-        it.helpMsg.push(esc(t('helpNarrowDone')));
+      if(kind === 'hint'){
+        const h = makeHint(it.q, qt(it.q));
+        it.helpMsg.push(esc(h || t('hintNone', tn(it.q.t))));
       }
       else if(kind === 'chapter'){
         const ch = findChapter(it.q);
         it.helpMsg.push(ch
           ? esc(t('helpChapterFound', tn(it.q.t), ch.title))
           : esc(t('helpChapterNone', tn(it.q.t))));
-      }
-      else if(kind === 'reveal'){
-        it.helped = true;
-        it.picked = it.correct;
-        it.helpMsg.push(esc(t('helpRevealed')));
-        if(S.instant){ S.answered = true; record(it); }
       }
       render();
     };
@@ -5236,16 +5245,13 @@ function screenQuiz(){
     '</div>';
 
   const shown = it.picked!==null && (S.instant || S.finished);
-  const cut = it.cut || [];
   const opts = it.order.map((oi,pos)=>{
     let cls = '';
     if(shown){
       if(pos===it.correct) cls=' right';
       else if(pos===it.picked) cls=' wrong';
     } else if(pos===it.picked) cls=' sel';
-    if(!shown && cut.indexOf(pos) > -1) cls += ' cut';
-    const off = shown || (cut.indexOf(pos) > -1);
-    return '<button class="opt'+cls+'" data-pick="'+pos+'"'+(off?' disabled':'')+'>'+
+    return '<button class="opt'+cls+'" data-pick="'+pos+'"'+(shown?' disabled':'')+'>'+
       '<span class="n">'+(pos+1)+'</span><span>'+esc(L.o[oi])+'</span></button>';
   }).join('');
 
