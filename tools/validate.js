@@ -59,7 +59,7 @@ function loadApp() {
     clearInterval: () => {}
   };
 
-  const scriptToRun = scriptCode + '\n;globalThis.__EXPORTS__ = { Q, KKQ, TOPICS, RULES_DATA, searchRules, screenRules, screenHome, screenAbout };';
+  const scriptToRun = scriptCode + '\n;globalThis.__EXPORTS__ = { Q, KKQ, TOPICS, RULES_DATA, SIGNS_DATA, MARKINGS_DATA, FINES_DATA, PMP_DATA, searchRules, searchSigns, searchMarkings, searchFines, screenRules, screenSigns, screenMarkings, screenFines, screenPmp, screenHome, screenAbout };';
   vm.createContext(sandbox);
   vm.runInContext(scriptToRun, sandbox);
   return sandbox.__EXPORTS__;
@@ -162,6 +162,51 @@ function runChecks() {
     if (!testSearch || testSearch.length === 0) {
       errors.push('searchRules("140") returned 0 results');
     }
+  }
+  // Check 5: Signs data integrity
+  const SIGNS = app.SIGNS_DATA;
+  if (!Array.isArray(SIGNS) || SIGNS.length === 0) {
+    errors.push('SIGNS_DATA is missing or empty');
+  } else {
+    SIGNS.forEach((s, si) => {
+      if (!s.num || !s.title || !s.group) errors.push(`SIGNS[${si}]: missing required fields`);
+    });
+    console.log(`Verified ${SIGNS.length} road signs.`);
+    const testSign = app.searchSigns('3.27');
+    if (!testSign || testSign.length === 0) errors.push('searchSigns("3.27") returned 0 results');
+  }
+
+  // Check 6: Markings data integrity
+  const MARKINGS = app.MARKINGS_DATA;
+  if (!Array.isArray(MARKINGS) || MARKINGS.length === 0) {
+    errors.push('MARKINGS_DATA is missing or empty');
+  } else {
+    let mCount = 0;
+    MARKINGS.forEach(g => { mCount += g.items.length; });
+    console.log(`Verified ${mCount} road markings in ${MARKINGS.length} groups.`);
+    const testMark = app.searchMarkings('1.1');
+    if (!testMark || testMark.length === 0) errors.push('searchMarkings("1.1") returned 0 results');
+  }
+
+  // Check 7: Fines data integrity
+  const FINES = app.FINES_DATA;
+  if (!Array.isArray(FINES) || FINES.length === 0) {
+    errors.push('FINES_DATA is missing or empty');
+  } else {
+    FINES.forEach((f, fi) => {
+      if (!f.art || !f.title || typeof f.mrp !== 'number') errors.push(`FINES[${fi}]: missing required fields`);
+    });
+    console.log(`Verified ${FINES.length} traffic fine articles (КоАП РК).`);
+    const testFine = app.searchFines('592');
+    if (!testFine || testFine.length === 0) errors.push('searchFines("592") returned 0 results');
+  }
+
+  // Check 8: First aid data integrity
+  const PMP = app.PMP_DATA;
+  if (!PMP || !Array.isArray(PMP.sections) || PMP.sections.length === 0) {
+    errors.push('PMP_DATA is missing or empty');
+  } else {
+    console.log(`Verified ${PMP.sections.length} first aid (ПМП) sections.`);
   }
 
   if (duplicates.length > 0) {
