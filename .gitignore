@@ -1,0 +1,10 @@
+# промежуточные и резервные файлы, в репозитории им не место
+_*.js
+_*.css
+*.py
+index.backup.html
+index.prestyle.html
+index.pre-i18n.html
+node_modules/
+.DS_Store
+Thumbs.db
